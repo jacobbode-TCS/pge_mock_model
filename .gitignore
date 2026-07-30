@@ -1,0 +1,19 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+
+# Testing environment tools
+tests/
+utils/
+
+# Dataset files
+birds/
+birds_split/
+
+# Base Models
+*.pt
+!trained_bird_classifier.pt
+
+# Virtual environments
+.venv
+
