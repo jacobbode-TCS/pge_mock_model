@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset=" utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Multi-Agent Workflow</title>
+</head>
+
+<body>
+    <h1>Multi-Agent Workflow</h1>
+    <p>Submit a request to run the multi-agent workflow through the Flask app.</p>
+
+    <form id="workflow-form">
+        <label for="request">Request</label>
+        <textarea id="request" name="request" rows="4" placeholder="Describe the task you want help with"></textarea>
+
+        <label>Image (optional)</label>
+
+        <div id="drop-zone" class="drop-zone">
+            <p>📁 Drag & Drop an image here</p>
+            <p>or click to browse</p>
+            <input type="file" id="image-file" accept="image/*" hidden>
+        </div>
+
+        <div id="preview-container" style="display:none;">
+            <img id="image-preview" class="image-preview">
+            <div class="preview-actions">
+                <span id="file-name"></span>
+                <button type="button" id="clear-image">
+                    Remove Image
+                </button>
+            </div>
+        </div>
+
+        <button type="submit">Run workflow</button>
+    </form>
+
+    <h2>Workflow Results</h2>
+
+    <div class="results-grid">
+        <div class="result-section">
+            <h3>Request</h3>
+            <pre id="request-result"></pre>
+        </div>
+
+        <div class="result-section">
+            <h3>Next Agent</h3>
+            <pre id="next-agent"></pre>
+        </div>
+
+        <div class="result-section">
+            <h3>Analysis</h3>
+            <pre id="analysis"></pre>
+        </div>
+
+        <div class="result-section">
+            <h3>Search</h3>
+            <pre id="search"></pre>
+        </div>
+
+        <div class="result-section">
+            <h3>Estimate</h3>
+            <pre id="estimate"></pre>
+        </div>
+
+        <div class="result-section">
+            <h3>Construction</h3>
+            <pre id="construction"></pre>
+        </div>
+
+        <div class="result-section">
+            <h3>Calibration</h3>
+            <pre id="calibration"></pre>
+        </div>
+
+        <script>
+            const preview = document.getElementById('image-preview');
+            const fileInput = document.getElementById('image-file');
+            const dropZone = document.getElementById('drop-zone');
+            const fileName = document.getElementById('file-name');
+            const previewContainer = document.getElementById('preview-container');
+            const clearButton = document.getElementById('clear-image');
+            let selectedFile = null;
+            const form = document.getElementById('workflow-form');
+            const requestResult = document.getElementById('request-result');
+            const nextAgent = document.getElementById('next-agent');
+            const analysis = document.getElementById('analysis');
+            const search = document.getElementById('search');
+            const estimate = document.getElementById('estimate');
+            const construction = document.getElementById('construction');
+            const calibration = document.getElementById('calibration');
+
+
+            function showPreview(file) {
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+
+                    preview.src = e.target.result;
+
+                    dropZone.style.display = 'none';
+                    previewContainer.style.display = 'block';
+
+                    fileName.textContent = file.name;
+                };
+
+                reader.readAsDataURL(file);
+            }
+            function clearImage() {
+
+                selectedFile = null;
+
+                fileInput.value = '';
+
+                preview.src = '';
+
+                previewContainer.style.display = 'none';
+                dropZone.style.display = 'block';
+
+                fileName.textContent = '';
+            }
+            clearButton.addEventListener('click', clearImage);
+            dropZone.addEventListener('click', () => {
+
+                if (selectedFile) {
+                    return;
+                }
+
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', (event) => {
+                selectedFile = event.target.files[0];
+
+                if (selectedFile) {
+                    fileName.textContent = selectedFile.name;
+                    showPreview(selectedFile);
+                }
+            });
+
+            dropZone.addEventListener('dragover', (event) => {
+
+                if (selectedFile) {
+                    return;
+                }
+
+                event.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (event) => {
+
+                if (selectedFile) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                dropZone.classList.remove('dragover');
+
+                selectedFile = event.dataTransfer.files[0];
+
+                if (selectedFile) {
+                    showPreview(selectedFile);
+                }
+            });
+            preview.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData();
+
+                formData.append(
+                    'request',
+                    document.getElementById('request').value
+                );
+
+                if (selectedFile) {
+                    formData.append('image', selectedFile);
+                }
+
+                requestResult.textContent = 'Running...';
+                const res = await fetch('/workflow', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+                requestResult.textContent = data.request || '';
+                nextAgent.textContent = data.next_agent || '';
+                analysis.textContent = typeof data.analysis === 'object'
+                    ? JSON.stringify(data.analysis, null, 2)
+                    : (data.analysis || '');
+
+                search.textContent = typeof data.search === 'object'
+                    ? JSON.stringify(data.search, null, 2)
+                    : (data.search || '');
+
+                estimate.textContent = typeof data.estimate === 'object'
+                    ? JSON.stringify(data.estimate, null, 2)
+                    : (data.estimate || '');
+
+                construction.textContent = typeof data.construction === 'object'
+                    ? JSON.stringify(data.construction, null, 2)
+                    : (data.construction || '');
+
+                calibration.textContent = typeof data.calibration === 'object'
+                    ? JSON.stringify(data.calibration, null, 2)
+                    : (data.calibration || '');
+            });
+        </script>
+</body>
+
+</html>
