@@ -53,28 +53,8 @@
     </div>
     <div class="results-grid">
         <div class="result-section">
-            <h3>Analysis</h3>
-            <pre id="analysis"></pre>
-        </div>
-
-        <div class="result-section">
-            <h3>Search</h3>
-            <pre id="search"></pre>
-        </div>
-
-        <div class="result-section">
-            <h3>Estimate</h3>
-            <pre id="estimate"></pre>
-        </div>
-
-        <div class="result-section">
-            <h3>Construction</h3>
-            <pre id="construction"></pre>
-        </div>
-
-        <div class="result-section">
-            <h3>Calibration</h3>
-            <pre id="calibration"></pre>
+            <h3 id="output-heading">output</h3>
+            <pre id="output"></pre>
         </div>
     </div>
 
@@ -89,11 +69,42 @@
             const form = document.getElementById('workflow-form');
             const requestResult = document.getElementById('request-result');
             const nextAgent = document.getElementById('next-agent');
-            const analysis = document.getElementById('analysis');
-            const search = document.getElementById('search');
-            const estimate = document.getElementById('estimate');
-            const construction = document.getElementById('construction');
-            const calibration = document.getElementById('calibration');
+            const outputHeading = document.getElementById('output-heading');
+            const output = document.getElementById('output');
+
+            function formatOutputValue(value) {
+                if (typeof value === 'object' && value !== null) {
+                    return JSON.stringify(value, null, 2);
+                }
+                return value || '';
+            }
+
+            function updateOutputSection(data) {
+                const outputKeyByAgent = {
+                    image_analysis: 'analysis',
+                    knowledge_search: 'search',
+                    estimation: 'estimate',
+                    construction: 'construction',
+                    calibration: 'calibration'
+                };
+
+                const outputLabelByAgent = {
+                    image_analysis: 'Analysis',
+                    knowledge_search: 'search',
+                    estimation: 'estimate',
+                    construction: 'construction',
+                    calibration: 'calibration'
+                };
+
+                const agentKey = data.next_agent || 'output';
+                const outputKey = outputKeyByAgent[agentKey] || 'output';
+                const outputValue = outputKey === 'output'
+                    ? data.message || ''
+                    : data[outputKey];
+
+                outputHeading.textContent = outputLabelByAgent[agentKey] || 'output';
+                output.textContent = formatOutputValue(outputValue);
+            }
 
 
             function showPreview(file) {
@@ -191,6 +202,8 @@
                 }
 
                 requestResult.textContent = 'Running...';
+                outputHeading.textContent = 'output';
+                output.textContent = 'Running...';
                 const res = await fetch('/workflow', {
                     method: 'POST',
                     body: formData
@@ -199,27 +212,10 @@
                 const data = await res.json();
                 requestResult.textContent = data.request || '';
                 nextAgent.textContent = data.next_agent || '';
-                analysis.textContent = typeof data.analysis === 'object'
-                    ? JSON.stringify(data.analysis, null, 2)
-                    : (data.analysis || '');
-
-                search.textContent = typeof data.search === 'object'
-                    ? JSON.stringify(data.search, null, 2)
-                    : (data.search || '');
-
-                estimate.textContent = typeof data.estimate === 'object'
-                    ? JSON.stringify(data.estimate, null, 2)
-                    : (data.estimate || '');
-
-                construction.textContent = typeof data.construction === 'object'
-                    ? JSON.stringify(data.construction, null, 2)
-                    : (data.construction || '');
-
-                calibration.textContent = typeof data.calibration === 'object'
-                    ? JSON.stringify(data.calibration, null, 2)
-                    : (data.calibration || '');
+                updateOutputSection(data);
             });
         </script>
+</div>
 </body>
 
 </html>
