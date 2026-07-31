@@ -1,14 +1,8 @@
 import os
 
 from langchain_tavily import TavilySearch
-<<<<<<< HEAD
-from typing import Literal
-from pydantic import BaseModel
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from datetime import datetime
-=======
 from langchain_core.messages import HumanMessage, SystemMessage
->>>>>>> 634e68135c061d158fe360a43ee084c832aeb380
 
 from llm.llm import llm
 
