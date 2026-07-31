@@ -1,4 +1,3 @@
-import os
 from typing import Literal
 
 from langchain_core.prompts import ChatPromptTemplate
