@@ -1,7 +1,14 @@
 import os
 
 from langchain_tavily import TavilySearch
+<<<<<<< HEAD
+from typing import Literal
+from pydantic import BaseModel
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from datetime import datetime
+=======
 from langchain_core.messages import HumanMessage, SystemMessage
+>>>>>>> 634e68135c061d158fe360a43ee084c832aeb380
 
 from llm.llm import llm
 
@@ -16,8 +23,10 @@ tools = [tavily_search]
 llm = llm.bind_tools(tools)
 
 def search_and_answer(question: str) -> dict:
+    current_date = datetime.now().strftime("%Y-%m-%d")
     system_message = SystemMessage(
         content="You are a helpful AI assistant with access to internet search via Tavily. "
+                f"Today's date is {current_date}. "
                 "When the user asks questions that would benefit from current information or web search, use the tavily_search tool. "
                 "Provide clear, concise, and informative responses."
     )
