@@ -4,15 +4,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from tavily import TavilyClient
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "lm-studio")
-OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "http://127.0.0.1:1234/v1")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "local-model")
-
-llm = ChatOpenAI(
-    openai_api_key=OPENAI_API_KEY,
-    openai_api_base=OPENAI_BASE_URL,
-    model=OPENAI_MODEL,
-)
+from llm.llm import llm
 
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 if TAVILY_API_KEY:

@@ -25,10 +25,10 @@ class WorkflowState(TypedDict, total=False):
     calibration: dict[str, Any] | None
 
 
-def _orchestrator_node(state: WorkflowState, llm_client=None) -> WorkflowState:
+def _orchestrator_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
     image_file = state.get("image_file")
-    decision = decide_next_agent(request, llm_client=llm_client)
+    decision = decide_next_agent(request)
     next_agent = decision.next_agent
     state["next_agent"] = next_agent
     state["image_file"] = image_file
@@ -80,12 +80,12 @@ def _route_after_orchestrator(state: WorkflowState) -> Literal["image_analysis",
     return state.get("next_agent", "review")
 
 
-def build_workflow_graph(llm_client=None):
+def build_workflow_graph():
     """Build a LangGraph workflow for orchestration and specialist execution."""
     workflow = StateGraph(WorkflowState)
 
     def orchestrator_node(state: WorkflowState) -> WorkflowState:
-        return _orchestrator_node(state, llm_client=llm_client)
+        return _orchestrator_node(state)
 
     workflow.add_node("orchestrator", orchestrator_node)
     workflow.add_node("image_analysis", _image_analysis_node)
@@ -120,9 +120,9 @@ def build_workflow_graph(llm_client=None):
 
 
 
-def run_workflow(request: str, image_path: str | None = None, llm_client=None) -> Dict[str, Any]:
+def run_workflow(request: str, image_path: str | None = None) -> Dict[str, Any]:
     """Run the workflow graph for a request."""
-    graph = build_workflow_graph(llm_client=llm_client)
+    graph = build_workflow_graph()
     initial_state = WorkflowState(request=request, image_file=image_path)
     result = graph.invoke(initial_state)
     return {
