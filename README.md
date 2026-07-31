@@ -56,7 +56,7 @@ Running the Project
 
 ```powershell
 python main.py
-open http://127.0.0.1:5000 on web browser of choice
+open http://127.0.0.1:5000 on web browser of choice with llm server running
 ```
 
 - To run tests:
