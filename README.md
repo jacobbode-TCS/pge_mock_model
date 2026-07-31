@@ -36,11 +36,18 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-2. Install dependencies (using pip):
+2. Install dependencies:
+
+Using pip:
 
 ```powershell
 pip install -U pip
 pip install -e .  # or: pip install -r requirements.txt if you have one
+```
+
+Using uv:
+```
+uv sync
 ```
 
 Running the Project

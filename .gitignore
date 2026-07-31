@@ -17,3 +17,6 @@ birds_split/
 # Virtual environments
 .venv
 
+# Evnironment variables
+.env
+
