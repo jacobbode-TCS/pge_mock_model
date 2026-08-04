@@ -26,10 +26,9 @@ else:
 
         Topics:
         - bird image classification or bird recognition
-        - construction guidance or assembly questions
-        - cost estimation, budgeting, or validation
-        - business-model or planning questions related to the mock system
-        - general knowledge questions about birds or bird-related products
+        - construction guidance or assembly questions for utility products or services.
+        - cost estimation, budgeting, or validation for utility products or services.
+        - general knowledge questions about utility products or services.
 
         Return only one of these values:
         - orchestrator
