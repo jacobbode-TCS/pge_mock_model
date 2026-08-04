@@ -80,30 +80,8 @@
             }
 
             function updateOutputSection(data) {
-                const outputKeyByAgent = {
-                    image_analysis: 'analysis',
-                    knowledge_search: 'search',
-                    estimation: 'estimate',
-                    construction: 'construction',
-                    calibration: 'calibration'
-                };
-
-                const outputLabelByAgent = {
-                    image_analysis: 'Analysis',
-                    knowledge_search: 'Search',
-                    estimation: 'Estimation',
-                    construction: 'Construction',
-                    calibration: 'Calibration'
-                };
-
-                const agentKey = data.next_agent || 'output';
-                const outputKey = outputKeyByAgent[agentKey] || 'output';
-                const outputValue = outputKey === 'output'
-                    ? data.message || ''
-                    : data[outputKey];
-
-                outputHeading.textContent = outputLabelByAgent[agentKey] || 'output';
-                output.textContent = formatOutputValue(outputValue);
+                const response = data.response;
+                output.textContent = formatOutputValue(response);
             }
 
 
