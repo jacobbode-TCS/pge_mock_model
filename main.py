@@ -38,12 +38,7 @@ def workflow():
     return jsonify({
         "request": request_text,
         "next_agent": result.get("next_agent"),
-        "analysis": result.get("analysis"),
-        "search": result.get("search"),
-        "estimate": result.get("estimate"),
-        "construction": result.get("construction"),
-        "calibration": result.get("calibration"),
-        "message": result.get("message"),
+        "response": result.get("response"),
     })
 
 

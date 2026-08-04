@@ -14,6 +14,8 @@ from chains.orchestrator_agent import decide_next_agent
 from chains.output_evaluation import decide_if_continue as decide_output
 from llm.llm import create_conversation
 
+VERBOSE = True
+
 
 class WorkflowState(TypedDict, total=False):
     """State schema passed through the workflow graph."""
@@ -21,11 +23,7 @@ class WorkflowState(TypedDict, total=False):
     request: str
     image_file: str | None
     next_agent: str
-    analysis: dict[str, Any] | None
-    search: dict[str, Any] | None
-    estimate: dict[str, Any] | None
-    construction: dict[str, Any] | None
-    calibration: dict[str, Any] | None
+    response: dict[str, Any] | str | None
 
 
 def _orchestrator_node(state: WorkflowState) -> WorkflowState:
@@ -38,6 +36,7 @@ def _orchestrator_node(state: WorkflowState) -> WorkflowState:
     next_agent = decision.next_agent
     state["next_agent"] = next_agent
     state["image_file"] = image_file
+    if VERBOSE: print(f"Orchestrator decision: {next_agent}")
     return state
 
 
@@ -46,37 +45,40 @@ def _image_analysis_node(state: WorkflowState) -> WorkflowState:
     image_file = state.get("image_file")
 
     if image_file is None:
-        state["analysis"] = None
+        state["response"] = None
         return state
 
-    state["analysis"] = classify_bird_image(image_file)
+    response = classify_bird_image(image_file)
+    state["response"] = f"Classification: {response['predicted_class']} | Confidence: {round(response['confidence'], 4)}"
 
     return state
 
 
 def _knowledge_search_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
-    state["search"] = knowledge_agent(request)
+
+    response = knowledge_agent(request)
+    state["response"] = response["answer"] if "answer" in response else response
     return state
 
 
 def _estimation_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
     conversation = state.get("_conversation")
-    state["estimate"] = estimate_cost(request, conversation=conversation)
+    state["response"] = estimate_cost(request)
     return state
 
 
 def _calibration_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
-    state["calibration"] = double_check(request)
+    state["response"] = double_check(request)
     return state
 
 
 def _construction_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
     conversation = state.get("_conversation")
-    state["construction"] = provide_construction_guidance(request, conversation=conversation)
+    state["response"] = provide_construction_guidance(request, conversation=conversation)
     return state
 
 
@@ -84,7 +86,7 @@ def _review_node(state: WorkflowState) -> WorkflowState:
     return state
 
 def _route_after_orchestrator(state: WorkflowState) -> Literal["image_analysis", "knowledge_search", "estimation", "construction", "review"]:
-    return state.get("next_agent", "review")
+    return state.get("next_agent", "review") #type: ignore
 
 def _input_evaluation_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
@@ -195,14 +197,10 @@ def run_workflow(request: str, image_path: str | None = None, conversation=None)
     if conversation is None:
         conversation = create_conversation()
 
-    initial_state = WorkflowState(request=request, image_file=image_path, _conversation=conversation)
+    initial_state = WorkflowState(request=request, image_file=image_path)
     result = graph.invoke(initial_state)
     return {
         "request": request,
         "next_agent": result.get("next_agent"),
-        "analysis": result.get("analysis"),
-        "search": result.get("search"),
-        "estimate": result.get("estimate"),
-        "construction": result.get("construction"),
-        "calibration": result.get("calibration"),
+        "response": result.get("response")
     }

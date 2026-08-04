@@ -5,29 +5,36 @@ from pydantic import BaseModel
 
 from llm.llm import llm
 
+# For testing, we can allow all prompts to be routed to the orchestrator
+ALLOW_ALL_PROMPTS = True
+
 
 class InputEvaluator(BaseModel):
     next_agent: Literal["orchestrator", "end"]
 
+if ALLOW_ALL_PROMPTS:
+    SYSTEM_PROMPT = """
+        You are an input evaluation agent in a multi-agent assistant chat. Route the user's request to the orchestrator.
+        """
+else:
+    SYSTEM_PROMPT = """
+        You are an input evaluation agent in a multi-agent assistant chat.
 
-SYSTEM_PROMPT = """
-You are an input evaluation agent in a multi-agent assistant chat.
+        Determine whether the user's request is relevant to the following topics.
+        If it is relevant, route it to the orchestrator.
+        If it is not relevant, route it to the end.
 
-Determine whether the user's request is relevant to the following topics.
-If it is relevant, route it to the orchestrator.
-If it is not relevant, route it to the end.
+        Topics:
+        - bird image classification or bird recognition
+        - construction guidance or assembly questions
+        - cost estimation, budgeting, or validation
+        - business-model or planning questions related to the mock system
+        - general knowledge questions about birds or bird-related products
 
-Topics:
-- bird image classification or bird recognition
-- construction guidance or assembly questions
-- cost estimation, budgeting, or validation
-- business-model or planning questions related to the mock system
-- general knowledge questions about birds or bird-related products
-
-Return only one of these values:
-- orchestrator
-- end
-"""
+        Return only one of these values:
+        - orchestrator
+        - end
+        """
 
 router = llm.with_structured_output(InputEvaluator)
 
