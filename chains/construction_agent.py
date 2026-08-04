@@ -12,7 +12,7 @@ else:
     tavily_client = None
 
 
-def provide_construction_guidance(request: str, max_results: int = 5, conversation=None) -> dict:
+def provide_construction_guidance(request: str, max_results: int = 5) -> dict:
     """Look up assembly or usage guidance for a model or product mentioned by the user."""
     if not TAVILY_API_KEY or tavily_client is None:
         return {
@@ -41,20 +41,14 @@ def provide_construction_guidance(request: str, max_results: int = 5, conversati
         "You provide practical guidance for assembling or using a product or model. "
         "Summarize the key steps and highlight any safety cautions."
     )
-    human_text = f"User request: {request}\n\nSearch results:\n{sources}"
 
-    if conversation is not None:
-        conversation.add_system(system_text)
-        conversation.add_user(human_text)
-        response = conversation.invoke()
-    else:
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                ("system", system_text),
-                ("human", "User request: {request}\n\nSearch results:\n{results}"),
-            ]
-        )
-        response = llm.invoke(prompt.format_messages(request=request, results=sources))
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            ("system", system_text),
+            ("human", "User request: {request}\n\nSearch results:\n{results}"),
+        ]
+    )
+    response = llm.invoke(prompt.format_messages(request=request, results=sources))
 
     return {
         "request": request,

@@ -60,19 +60,9 @@ def _coerce_input_evaluator(response) -> InputEvaluator:
     raise ValueError(f"Unable to parse input evaluation response: {response}")
 
 
-def decide_if_continue(request: str, conversation=None, llm_client=None) -> InputEvaluator:
+def decide_if_continue(request: str,) -> InputEvaluator:
     """Decide whether to continue the workflow for the given request."""
 
-    if llm_client is None:
-        client = router
-    else:
-        client = llm_client
-
-    if conversation is not None:
-        conversation.add_system(SYSTEM_PROMPT)
-        conversation.add_user(request)
-        response = client.invoke(conversation.history)
-        return _coerce_input_evaluator(response)
 
     prompt = ChatPromptTemplate.from_messages(
         [
@@ -80,5 +70,5 @@ def decide_if_continue(request: str, conversation=None, llm_client=None) -> Inpu
             ("human", "{request}"),
         ]
     )
-    response = client.invoke(prompt.format_messages(request=request))
-    return _coerce_input_evaluator(response)
+    response = router.invoke(prompt.format_messages(request=request))
+    return response
