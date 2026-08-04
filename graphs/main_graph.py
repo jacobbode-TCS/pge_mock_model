@@ -86,6 +86,7 @@ def _construction_node(state: WorkflowState) -> WorkflowState:
 
 
 def _review_node(state: WorkflowState) -> WorkflowState:
+    print("Marked for human review")
     return state
 
 def _route_after_orchestrator(state: WorkflowState) -> Literal["image_analysis", "knowledge_search", "estimation", "construction", "review"]:

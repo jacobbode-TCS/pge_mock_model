@@ -8,7 +8,6 @@ from llm.llm import llm
 # For testing, we can allow all prompts to be routed to the orchestrator
 ALLOW_ALL_PROMPTS = False
 
-
 class InputEvaluator(BaseModel):
     next_agent: Literal["orchestrator", "end"]
 
@@ -36,28 +35,6 @@ else:
         """
 
 router = llm.with_structured_output(InputEvaluator)
-
-
-def _coerce_input_evaluator(response) -> InputEvaluator:
-    if isinstance(response, InputEvaluator):
-        return response
-
-    if hasattr(response, "parsed") and response.parsed is not None:
-        return response.parsed
-
-    if hasattr(response, "content"):
-        content = response.content
-    elif isinstance(response, dict):
-        content = response.get("next_agent") or response.get("content")
-    else:
-        content = str(response)
-
-    if isinstance(content, str):
-        normalized = content.strip().lower()
-        if normalized in {"orchestrator", "end"}:
-            return InputEvaluator(next_agent=normalized)
-
-    raise ValueError(f"Unable to parse input evaluation response: {response}")
 
 
 def decide_if_continue(request: str,) -> InputEvaluator:
