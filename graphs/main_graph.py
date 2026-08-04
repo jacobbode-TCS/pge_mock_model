@@ -102,26 +102,16 @@ def _input_evaluation_node(state: WorkflowState) -> WorkflowState:
     conversation = state.get("_conversation")
     decision = decide_if_continue(request, conversation=conversation)
     state["next_agent"] = decision.next_agent
-    return state
 
-def _extract_latest_output(state: WorkflowState) -> str:
-    for key in ("construction", "estimate", "analysis", "search", "calibration"):
-        value = state.get(key)
-        if value is None:
-            continue
-        if isinstance(value, dict):
-            if "result" in value:
-                return str(value["result"])
-            return str(value)
-        return str(value)
-    return ""
+    if decision.next_agent == "end":
+        state["response"] = "The request is not relevant to our services. Ending conversation."
+    return state
 
 
 def _output_evaluation_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
     conversation = state.get("_conversation")
-    output = _extract_latest_output(state)
-    decision = decide_output(request, conversation=conversation, output=output)
+    decision = decide_output(request, conversation=conversation, output=state["response"])
     state["next_agent"] = decision.next_agent
     return state
 

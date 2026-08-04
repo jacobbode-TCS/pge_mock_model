@@ -83,10 +83,9 @@
         }
 
         function updateOutputSection(data) {
-            const response = data.response;
+            const response = data.error ? data.error : data.response;
             output.innerHTML = marked.parse(formatOutputValue(response));
         }
-
 
         function showPreview(file) {
 

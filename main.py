@@ -4,6 +4,7 @@ from graphs.main_graph import run_workflow
 
 app = Flask(__name__, template_folder="templates")
 
+# VERBOSE = True
 
 def response_to_markdown(response):
     """Convert workflow response payloads into Markdown-friendly text."""
@@ -53,10 +54,14 @@ def workflow():
             image_path=image_file if image_file and image_file.filename else None, #type: ignore
         )
 
-    except Exception as exc:
+    except BaseException as exc:
+        print(exc)
         return jsonify({"error": str(exc)}), 500
 
     response_text = response_to_markdown(result.get("response"))
+    # except Exception as exc:
+    #     print(f"Error running workflow: {exc}")
+    #     return jsonify({"error": str(exc)}), 500
 
     return jsonify({
         "request": request_text,
