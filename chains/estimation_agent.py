@@ -12,7 +12,7 @@ else:
     tavily_client = None
 
 
-def estimate_cost(request: str, max_results: int = 5) -> dict:
+def estimate_cost(request: str, max_results: int = 5, conversation=None) -> dict:
     """Estimate a ballpark cost for a user request by searching the web and summarizing findings."""
     if not TAVILY_API_KEY or tavily_client is None:
         return {
@@ -37,20 +37,24 @@ def estimate_cost(request: str, max_results: int = 5) -> dict:
             }
         )
 
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                "You provide rough cost estimates from web search results. "
-                "Return a short answer with a ballpark estimate and mention the currency.",
-            ),
-            (
-                "human",
-                "User request: {request}\n\nSearch results:\n{results}",
-            ),
-        ]
+    system_text = (
+        "You provide rough cost estimates from web search results. "
+        "Return a short answer with a ballpark estimate and mention the currency."
     )
-    response = llm.invoke(prompt.format_messages(request=request, results=sources))
+    human_text = f"User request: {request}\n\nSearch results:\n{sources}"
+
+    if conversation is not None:
+        conversation.add_system(system_text)
+        conversation.add_user(human_text)
+        response = conversation.invoke()
+    else:
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_text),
+                ("human", "User request: {request}\n\nSearch results:\n{results}"),
+            ]
+        )
+        response = llm.invoke(prompt.format_messages(request=request, results=sources))
 
     return {
         "request": request,
