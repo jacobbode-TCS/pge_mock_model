@@ -8,8 +8,10 @@ from chains.calibration_agent import double_check
 from chains.construction_agent import provide_construction_guidance
 from chains.estimation_agent import estimate_cost
 from chains.image_analysis_agent import classify_bird_image
+from chains.input_evaluation import decide_if_continue
 from chains.knowledge_search_agent import knowledge_agent
 from chains.orchestrator_agent import decide_next_agent
+from chains.output_evaluation import decide_if_continue as decide_output
 from llm.llm import create_conversation
 
 
@@ -85,16 +87,47 @@ def _route_after_orchestrator(state: WorkflowState) -> Literal["image_analysis",
     return state.get("next_agent", "review")
 
 def _input_evaluation_node(state: WorkflowState) -> WorkflowState:
+    request = state.get("request", "")
+    conversation = state.get("_conversation")
+    decision = decide_if_continue(request, conversation=conversation)
+    state["next_agent"] = decision.next_agent
     return state
+
+def _extract_latest_output(state: WorkflowState) -> str:
+    for key in ("construction", "estimate", "analysis", "search", "calibration"):
+        value = state.get(key)
+        if value is None:
+            continue
+        if isinstance(value, dict):
+            if "result" in value:
+                return str(value["result"])
+            return str(value)
+        return str(value)
+    return ""
+
 
 def _output_evaluation_node(state: WorkflowState) -> WorkflowState:
+    request = state.get("request", "")
+    conversation = state.get("_conversation")
+    output = _extract_latest_output(state)
+    decision = decide_output(request, conversation=conversation, output=output)
+    state["next_agent"] = decision.next_agent
     return state
 
-def _route_after_output_evaluation(state: WorkflowState) -> Literal["review", END]: # type: ignore
-    return state.get("next_agent", END)
+def _route_after_output_evaluation(state: WorkflowState) -> Literal["review", END]:  # type: ignore
+    next_agent = state.get("next_agent")
+    if next_agent == "review":
+        return "review"
+    print(state)
+    return END
 
-def _route_after_input_evaluation(state: WorkflowState) -> Literal["review", END]:  # type: ignore
-    return state.get("next_agent", END)
+
+def _route_after_input_evaluation(state: WorkflowState) -> Literal["orchestrator", END]:  # type: ignore
+    next_agent = state.get("next_agent")
+    if next_agent == "orchestrator":
+        return "orchestrator"
+    print(state)
+    return END
 
 def build_workflow_graph():
     """Build a LangGraph workflow for orchestration and specialist execution."""
