@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from llm.llm import llm
 
 # For testing, we can allow all prompts to be routed to the orchestrator
-ALLOW_ALL_PROMPTS = True
+ALLOW_ALL_PROMPTS = False
 
 
 class InputEvaluator(BaseModel):

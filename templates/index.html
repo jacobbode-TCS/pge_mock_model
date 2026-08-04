@@ -80,7 +80,7 @@
             }
 
             function updateOutputSection(data) {
-                const response = data.response;
+                const response = data.error ? data.error : data.response;
                 output.textContent = formatOutputValue(response);
             }
 
