@@ -47,8 +47,8 @@
     
 
         <div class="result-section">
-            <h3>Next Agent</h3>
-            <pre id="next-agent"></pre>
+            <h3>Agent</h3>
+            <pre id="chosen-agent"></pre>
         </div>
     </div>
     <div class="results-grid">
@@ -68,7 +68,7 @@
             let selectedFile = null;
             const form = document.getElementById('workflow-form');
             const requestResult = document.getElementById('request-result');
-            const nextAgent = document.getElementById('next-agent');
+            const chosenAgent = document.getElementById('chosen-agent');
             const outputHeading = document.getElementById('output-heading');
             const output = document.getElementById('output');
 
@@ -189,11 +189,10 @@
 
                 const data = await res.json();
                 requestResult.textContent = data.request || '';
-                nextAgent.textContent = data.next_agent || '';
+                chosenAgent.textContent = data.chosen_agent || '';
                 updateOutputSection(data);
             });
         </script>
-</div>
 </body>
 
 </html>

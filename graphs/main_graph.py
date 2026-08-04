@@ -18,11 +18,19 @@ VERBOSE = True
 
 
 class WorkflowState(TypedDict, total=False):
-    """State schema passed through the workflow graph."""
+    """State schema passed through the workflow graph.
+    
+    request: str: The user's request.
+    image_file: str | None: The path to the image file, if any.
+    next_agent: str: The next agent to route the request to.
+    chosen_agent: str: The agent that was chosen to handle the request.
+    response: dict[str, Any] | str | None: The response from the chosen agent.
+    """
 
     request: str
     image_file: str | None
     next_agent: str
+    chosen_agent: str
     response: dict[str, Any] | str | None
 
 
@@ -35,6 +43,7 @@ def _orchestrator_node(state: WorkflowState) -> WorkflowState:
     decision = decide_next_agent(request, conversation=conversation)
     next_agent = decision.next_agent
     state["next_agent"] = next_agent
+    state["chosen_agent"] = next_agent
     state["image_file"] = image_file
     if VERBOSE: print(f"Orchestrator decision: {next_agent}")
     return state
@@ -202,5 +211,6 @@ def run_workflow(request: str, image_path: str | None = None, conversation=None)
     return {
         "request": request,
         "next_agent": result.get("next_agent"),
+        "chosen_agent": result.get("chosen_agent"),
         "response": result.get("response")
     }
