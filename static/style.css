@@ -154,6 +154,46 @@ pre:empty::before {
     transition: all 0.2s ease;
 }
 
+.markdown-output {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+    min-height: 80px;
+}
+
+.markdown-output h1,
+.markdown-output h2,
+.markdown-output h3 {
+    color: #1e3a8a;
+    margin: 1rem 0 0.5rem;
+}
+
+.markdown-output p {
+    margin-bottom: 1rem;
+    color: #1f2937;
+}
+
+.markdown-output code {
+    background: #eef2ff;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.markdown-output pre {
+    background: #111827;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+}
+
+.markdown-output ul,
+.markdown-output ol {
+    padding-left: 1.5rem;
+}
+
 .drop-zone:hover {
     background: #eff6ff;
 }

@@ -5,6 +5,27 @@ from graphs.main_graph import run_workflow
 app = Flask(__name__, template_folder="templates")
 
 
+def response_to_markdown(response):
+    """Convert workflow response payloads into Markdown-friendly text."""
+    if response is None:
+        return ""
+
+    if isinstance(response, str):
+        return response.strip()
+
+    if isinstance(response, dict):
+        lines = []
+        for key, value in response.items():
+            if isinstance(value, (dict, list)):
+                value_text = str(value)
+            else:
+                value_text = str(value)
+            lines.append(f"- **{key}**: {value_text}")
+        return "\n".join(lines)
+
+    return str(response)
+
+
 @app.get("/")
 def home():
     """Render the main page with a simple form for interacting with the workflow."""
@@ -35,11 +56,12 @@ def workflow():
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
 
+    response_text = response_to_markdown(result.get("response"))
+
     return jsonify({
         "request": request_text,
-        # "next_agent": result.get("next_agent"),
         "chosen_agent": result.get("chosen_agent"),
-        "response": result.get("response"),
+        "response": response_text,
     })
 
 
