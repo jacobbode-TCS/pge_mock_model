@@ -53,7 +53,7 @@
     </div>
     <div class="results-grid">
         <div class="result-section">
-            <h3 id="output-heading">output</h3>
+            <h3 id="output-heading">Output</h3>
             <pre id="output"></pre>
         </div>
     </div>
@@ -90,10 +90,10 @@
 
                 const outputLabelByAgent = {
                     image_analysis: 'Analysis',
-                    knowledge_search: 'search',
-                    estimation: 'estimate',
-                    construction: 'construction',
-                    calibration: 'calibration'
+                    knowledge_search: 'Search',
+                    estimation: 'Estimation',
+                    construction: 'Construction',
+                    calibration: 'Calibration'
                 };
 
                 const agentKey = data.next_agent || 'output';
@@ -202,7 +202,7 @@
                 }
 
                 requestResult.textContent = 'Running...';
-                outputHeading.textContent = 'output';
+                outputHeading.textContent = 'Output';
                 output.textContent = 'Running...';
                 const res = await fetch('/workflow', {
                     method: 'POST',
