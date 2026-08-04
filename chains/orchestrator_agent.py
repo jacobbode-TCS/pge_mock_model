@@ -44,7 +44,7 @@ Return only the selected agent.
 
 router = llm.with_structured_output(Orchestrator)
 
-def decide_next_agent(request: str, conversation=None) -> Orchestrator:
+def decide_next_agent(request: str) -> Orchestrator:
     """Decide the next agent to route to.
 
     If `conversation` is provided the system+user messages are appended to
@@ -56,10 +56,6 @@ def decide_next_agent(request: str, conversation=None) -> Orchestrator:
 
     # If a conversation is provided, add the routing system prompt and the
     # user request to the shared history and invoke using that history.
-    if conversation is not None:
-        conversation.add_system(SYSTEM_PROMPT)
-        conversation.add_user(request)
-        return client.invoke(conversation.history)
 
     # Fallback to the single-shot prompt behaviour
     prompt = ChatPromptTemplate.from_messages(

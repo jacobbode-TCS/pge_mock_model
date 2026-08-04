@@ -12,7 +12,6 @@ from chains.input_evaluation import decide_if_continue
 from chains.knowledge_search_agent import knowledge_agent
 from chains.orchestrator_agent import decide_next_agent
 from chains.output_evaluation import decide_if_continue as decide_output
-from llm.llm import create_conversation
 
 VERBOSE = True
 
@@ -37,10 +36,7 @@ class WorkflowState(TypedDict, total=False):
 def _orchestrator_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
     image_file = state.get("image_file")
-    # conversation is injected into the graph via state if present, otherwise
-    # a per-run conversation is created in run_workflow
-    conversation = state.get("_conversation")
-    decision = decide_next_agent(request, conversation=conversation)
+    decision = decide_next_agent(request)
     next_agent = decision.next_agent
     state["next_agent"] = next_agent
     state["chosen_agent"] = next_agent
@@ -73,7 +69,6 @@ def _knowledge_search_node(state: WorkflowState) -> WorkflowState:
 
 def _estimation_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
-    conversation = state.get("_conversation")
     state["response"] = estimate_cost(request)
     return state
 
@@ -86,12 +81,12 @@ def _calibration_node(state: WorkflowState) -> WorkflowState:
 
 def _construction_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
-    conversation = state.get("_conversation")
-    state["response"] = provide_construction_guidance(request, conversation=conversation)
+    state["response"] = provide_construction_guidance(request)
     return state
 
 
 def _review_node(state: WorkflowState) -> WorkflowState:
+    print("Marked for human review")
     return state
 
 def _route_after_orchestrator(state: WorkflowState) -> Literal["image_analysis", "knowledge_search", "estimation", "construction", "review"]:
@@ -99,8 +94,7 @@ def _route_after_orchestrator(state: WorkflowState) -> Literal["image_analysis",
 
 def _input_evaluation_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
-    conversation = state.get("_conversation")
-    decision = decide_if_continue(request, conversation=conversation)
+    decision = decide_if_continue(request)
     state["next_agent"] = decision.next_agent
 
     if decision.next_agent == "end":
@@ -110,8 +104,7 @@ def _input_evaluation_node(state: WorkflowState) -> WorkflowState:
 
 def _output_evaluation_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
-    conversation = state.get("_conversation")
-    decision = decide_output(request, conversation=conversation, output=state["response"])
+    decision = decide_output(request, output=state["response"])
     state["next_agent"] = decision.next_agent
     return state
 
@@ -189,12 +182,9 @@ def build_workflow_graph():
 
 
 
-def run_workflow(request: str, image_path: str | None = None, conversation=None) -> Dict[str, Any]:
+def run_workflow(request: str, image_path: str | None = None) -> Dict[str, Any]:
     """Run the workflow graph for a request."""
     graph = build_workflow_graph()
-    # create a conversation for this run if none provided
-    if conversation is None:
-        conversation = create_conversation()
 
     initial_state = WorkflowState(request=request, image_file=image_path)
     result = graph.invoke(initial_state)
