@@ -29,7 +29,7 @@ def workflow():
     try:
         result = run_workflow(
             request=request_text,
-            image_path=image_file if image_file and image_file.filename else None,
+            image_path=image_file if image_file and image_file.filename else None, #type: ignore
         )
 
     except Exception as exc:
