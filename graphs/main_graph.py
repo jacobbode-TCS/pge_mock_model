@@ -86,6 +86,7 @@ def _construction_node(state: WorkflowState) -> WorkflowState:
 
 
 def _review_node(state: WorkflowState) -> WorkflowState:
+    state["response"] = {"response": state["response"], "message": "This request has been marked for human review."} #type: ignore
     print("Marked for human review")
     return state
 
