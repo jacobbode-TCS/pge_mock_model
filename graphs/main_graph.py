@@ -22,7 +22,8 @@ class WorkflowState(TypedDict, total=False):
     request: str: The user's request.
     image_file: str | None: The path to the image file, if any.
     next_agent: str: The next agent to route the request to.
-    chosen_agent: str: The agent that was chosen to handle the request.
+    chosen_agent: str: The primary agent, among image analysis, construction, estimation, 
+        knowledge search, and review, that was chosen to handle the request.
     response: dict[str, Any] | str | None: The response from the chosen agent.
     """
 
@@ -81,7 +82,9 @@ def _calibration_node(state: WorkflowState) -> WorkflowState:
 
 def _construction_node(state: WorkflowState) -> WorkflowState:
     request = state.get("request", "")
-    state["response"] = provide_construction_guidance(request)
+
+    response = provide_construction_guidance(request)
+    state["response"] = response["guidance"] if "guidance" in response else response
     return state
 
 
@@ -91,9 +94,11 @@ def _review_node(state: WorkflowState) -> WorkflowState:
     return state
 
 def _route_after_orchestrator(state: WorkflowState) -> Literal["image_analysis", "knowledge_search", "estimation", "construction", "review"]:
+    """The conditional routing function after the orcestrator node."""
     return state.get("next_agent", "review") #type: ignore
 
 def _input_evaluation_node(state: WorkflowState) -> WorkflowState:
+    """Evaluate the input request and decide whether to continue the workflow or end it."""
     request = state.get("request", "")
     decision = decide_if_continue(request)
     state["next_agent"] = decision.next_agent
@@ -102,10 +107,10 @@ def _input_evaluation_node(state: WorkflowState) -> WorkflowState:
         state["response"] = "The request is not relevant to our services. Ending conversation."
     return state
 
-
 def _output_evaluation_node(state: WorkflowState) -> WorkflowState:
+    """Evaluate the output response and decide whether end the workflow or send to review."""
     request = state.get("request", "")
-    decision = decide_output(request, output=state["response"])
+    decision = decide_output(request, output=state["response"] if "response" in state else None)
     state["next_agent"] = decision.next_agent
     return state
 

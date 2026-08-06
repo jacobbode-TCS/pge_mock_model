@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel
@@ -31,7 +31,7 @@ else:
 router = llm.with_structured_output(OutputEvaluator)
 
 
-def decide_if_continue(request: str, output: str | None = None) -> OutputEvaluator:
+def decide_if_continue(request: str, output: dict[str, Any] | str | None = None) -> OutputEvaluator:
     """Decide whether the latest output is good enough to finish the workflow."""
 
     evaluation_text = f"User request:\n{request}\n\nLatest output:\n{output or ''}"

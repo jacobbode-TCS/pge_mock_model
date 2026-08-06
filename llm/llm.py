@@ -4,11 +4,11 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
-load_dotenv()
+load_dotenv(override=True)
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY1", "lm-studio")
-OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL1", "http://127.0.0.1:1234/v1")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL1", "local-model")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "lm-studio")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "http://127.0.0.1:1234/v1")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "local-model")
 
 # Build LLM using the variables above
 llm = ChatOpenAI(

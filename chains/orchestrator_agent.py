@@ -13,6 +13,7 @@ class Orchestrator(BaseModel):
         "knowledge_search",
         "review",
     ]
+
 SYSTEM_PROMPT = """
 You are a routing agent in a multi-agent system.
 
@@ -63,4 +64,10 @@ def decide_next_agent(request: str) -> Orchestrator:
         ]
     )
 
-    return router.invoke(prompt.format_messages(request=request)) #type: ignore
+    # Return orchestrator result
+    result = router.invoke(prompt.format_messages(request=request))
+    
+    if isinstance(result, Orchestrator):
+        return result
+    else:
+        raise ValueError(f"Unexpected result type: {type(result)}. Expected Orchestrator instance.")
