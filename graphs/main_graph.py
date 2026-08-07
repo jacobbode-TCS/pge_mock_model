@@ -15,7 +15,6 @@ from chains.output_evaluation import decide_if_continue as decide_output
 
 VERBOSE = True
 
-
 class WorkflowState(TypedDict, total=False):
     """State schema passed through the workflow graph.
     
@@ -32,6 +31,7 @@ class WorkflowState(TypedDict, total=False):
     next_agent: str
     chosen_agent: str
     response: dict[str, Any] | str | None
+    sources: list[dict[str, Any]] | None
 
 
 def _orchestrator_node(state: WorkflowState) -> WorkflowState:
@@ -47,7 +47,7 @@ def _orchestrator_node(state: WorkflowState) -> WorkflowState:
 
 
 def _image_analysis_node(state: WorkflowState) -> WorkflowState:
-    request = state.get("request", "")
+    request = state.get("request", "") # Jacob what was this for -Heather
     image_file = state.get("image_file")
 
     if image_file is None:
@@ -65,6 +65,7 @@ def _knowledge_search_node(state: WorkflowState) -> WorkflowState:
 
     response = knowledge_agent(request)
     state["response"] = response["answer"] if "answer" in response else response
+    state["sources"] = response.get("sources", ["Hello world", "Hello Jacob!"])
     return state
 
 
@@ -85,6 +86,7 @@ def _construction_node(state: WorkflowState) -> WorkflowState:
 
     response = provide_construction_guidance(request)
     state["response"] = response["guidance"] if "guidance" in response else response
+    state["sources"] = response.get("sources", [])
     return state
 
 
@@ -118,7 +120,7 @@ def _route_after_output_evaluation(state: WorkflowState) -> Literal["review", EN
     next_agent = state.get("next_agent")
     if next_agent == "review":
         return "review"
-    print(state)
+    if VERBOSE: print(state)
     return END
 
 
@@ -126,7 +128,7 @@ def _route_after_input_evaluation(state: WorkflowState) -> Literal["orchestrator
     next_agent = state.get("next_agent")
     if next_agent == "orchestrator":
         return "orchestrator"
-    print(state)
+    if VERBOSE: print(state)
     return END
 
 def build_workflow_graph():
@@ -198,5 +200,6 @@ def run_workflow(request: str, image_path: str | None = None) -> Dict[str, Any]:
         "request": request,
         "next_agent": result.get("next_agent"),
         "chosen_agent": result.get("chosen_agent"),
-        "response": result.get("response")
+        "response": result.get("response"),
+        "sources": result.get("sources")
     }

@@ -154,6 +154,7 @@ pre:empty::before {
     transition: all 0.2s ease;
 }
 
+/* Output Styling */
 .markdown-output {
     background: #f8fafc;
     border: 1px solid #e5e7eb;
@@ -194,6 +195,8 @@ pre:empty::before {
 .markdown-output ol {
     padding-left: 1.5rem;
 }
+
+/* Drop Zone Styling */
 
 .drop-zone:hover {
     background: #eff6ff;
@@ -246,4 +249,51 @@ pre:empty::before {
 
 .drop-zone.hidden {
     display: none;
+}
+
+/* Sources Styling */
+.source-item {
+    margin-bottom: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 6px;
+}
+
+.source-item summary {
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.source-item a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.source-item a:hover {
+    text-decoration: underline;
+}
+
+.source-content {
+    margin-top: 8px;
+    white-space: pre-wrap;
+}
+
+.source-item summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.sources[open] summary::before {
+    transform: rotate(90deg);
+}
+
+.source-item[open] summary::before {
+    transform: rotate(90deg);
+}
+
+summary::before {
+    content: "▶";
+    display: inline-block;
+    margin-right: 6px;
+    transition: transform 0.2s;
 }
