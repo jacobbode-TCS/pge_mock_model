@@ -13,6 +13,7 @@ class Orchestrator(BaseModel):
         "knowledge_search",
         "review",
     ]
+
 SYSTEM_PROMPT = """
 You are a routing agent in a multi-agent system.
 
@@ -52,8 +53,6 @@ def decide_next_agent(request: str) -> Orchestrator:
     accumulated messages so the model can consider prior turns.
     """
 
-    client = router
-
     # If a conversation is provided, add the routing system prompt and the
     # user request to the shared history and invoke using that history.
 
@@ -65,4 +64,10 @@ def decide_next_agent(request: str) -> Orchestrator:
         ]
     )
 
-    return client.invoke(prompt.format_messages(request=request))
+    # Return orchestrator result
+    result = router.invoke(prompt.format_messages(request=request))
+    
+    if isinstance(result, Orchestrator):
+        return result
+    else:
+        raise ValueError(f"Unexpected result type: {type(result)}. Expected Orchestrator instance.")

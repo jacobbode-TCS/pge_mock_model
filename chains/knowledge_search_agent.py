@@ -28,22 +28,25 @@ def search_and_answer(question: str) -> dict:
     full_history = [system_message, human_message]
     response = llm.invoke(full_history)
     print("Tool calls:", response.tool_calls)
+
     # Handle tool calls if the model wants to use them
-    if hasattr(response, 'tool_calls') and response.tool_calls:
+    if response.tool_calls:
         # Process tool calls
         for tool_call in response.tool_calls:
-                # Execute the search
-                search_result = tavily_search.invoke(tool_call['args'])
-                # Add tool result to conversation
-                from langchain_core.messages import ToolMessage
-                full_history.append(response)
-                full_history.append(ToolMessage(content=str(search_result), tool_call_id=tool_call['id']))
-                # Get final response after tool use
-                response = llm.invoke(full_history)
+            # Execute the search
+            search_result = tavily_search.invoke(tool_call['args'])
+            # Add tool result to conversation
+            from langchain_core.messages import ToolMessage
+            full_history.append(response)
+            full_history.append(ToolMessage(content=str(search_result), tool_call_id=tool_call['id']))
+            # Get final response after tool use
+            response = llm.invoke(full_history)
+            sources = search_result.get("results", [])
 
     return {
         "question": question,
         "answer": str(response.content),
+        "sources": sources
     }
 
 def knowledge_agent(question: str) -> dict:

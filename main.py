@@ -59,14 +59,12 @@ def workflow():
         return jsonify({"error": str(exc)}), 500
 
     response_text = response_to_markdown(result.get("response"))
-    # except Exception as exc:
-    #     print(f"Error running workflow: {exc}")
-    #     return jsonify({"error": str(exc)}), 500
 
     return jsonify({
         "request": request_text,
         "chosen_agent": result.get("chosen_agent"),
         "response": response_text,
+        "sources": result.get("sources")
     })
 
 
