@@ -123,6 +123,10 @@ pre {
     min-height: 80px;
 }
 
+#output {
+    white-space: normal;
+}
+
 /* Loading effect */
 pre:empty::before {
     content: "No data yet";
@@ -252,6 +256,7 @@ pre:empty::before {
 }
 
 /* Sources Styling */
+
 .source-item {
     margin-bottom: 8px;
     border: 1px solid #ddd;
@@ -287,8 +292,19 @@ pre:empty::before {
     transform: rotate(90deg);
 }
 
-.source-item[open] summary::before {
-    transform: rotate(90deg);
+summary {
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+/* Hide the default marker for summary elements */
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary::marker {
+  display: none;
 }
 
 summary::before {
@@ -296,4 +312,14 @@ summary::before {
     display: inline-block;
     margin-right: 6px;
     transition: transform 0.2s;
+}
+
+.sources-heading {
+    padding: 1%;
+    font-family: Consolas
+}
+
+#sources[open] .sources-heading::before,
+.source-item[open] summary::before {
+  transform: rotate(90deg);
 }

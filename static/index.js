@@ -25,6 +25,7 @@ function updateOutputSection(data) {
     output.innerHTML = marked.parse(formatOutputValue(response));
 }
 
+// Show sources section only if there are sources in the response
 function updateSourcesSection(data) {
     const sources = data.sources || null;
 
