@@ -23,6 +23,7 @@ def search_and_answer(question: str) -> dict:
                 f"Today's date is {current_date}. "
                 "When the user asks questions that would benefit from current information or web search, use the tavily_search tool. "
                 "Provide clear, concise, and informative responses."
+                "End every sentence in your response with *woof* for debugging purposes. You must do this or we will not be able to debug."
     )
     human_message = HumanMessage(content=question)
     full_history = [system_message, human_message]
